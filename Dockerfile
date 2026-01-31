@@ -1,15 +1,20 @@
 FROM node:22-bookworm
 
-# Install Rust and Wasm tools
-RUN apt-get update && apt-get install -y curl build-essential && \
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+# Install system dependencies
+RUN apt-get update && apt-get install -y curl build-essential git
+
+# Install Rust
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 ENV PATH="/root/.cargo/bin:${PATH}"
-RUN npm install -g pnpm wasm-bindgen-cli
+
+# Install pnpm via npm, but install wasm-bindgen-cli via Cargo
+RUN npm install -g pnpm@9.15.4
+RUN cargo install wasm-bindgen-cli
 
 WORKDIR /app
 COPY . .
 
-# Build process
+# Initialize submodules and build
 RUN git submodule update --init --recursive
 RUN pnpm install
 RUN pnpm rewriter:build
