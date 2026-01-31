@@ -8,12 +8,12 @@ RUN apt-get update && apt-get install -y \
     binaryen \
     && rm -rf /var/lib/apt/lists/*
 
-# 2. Install Rust
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+# 2. Install Rust - Pinning to 1.82.0 to avoid "invalid flags byte" errors
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain 1.82.0
 ENV PATH="/root/.cargo/bin:${PATH}"
 
 # 3. Install global Node tools and Rust WASM tools
-# Note: Added --version 0.2.100 to satisfy the Scramjet build script requirements
+# We keep wasm-bindgen at 0.2.100 as Scramjet requires
 RUN npm install -g pnpm@9.15.4 \
     && cargo install wasm-bindgen-cli --version 0.2.100 \
     && cargo install wasm-snip
